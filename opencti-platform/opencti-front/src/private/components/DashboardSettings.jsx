@@ -31,7 +31,7 @@ export const dashboardSettingsDashboardsQuery = graphql`
     $count: Int!
     $orderBy: WorkspacesOrdering
     $orderMode: OrderingMode
-    $filters: [WorkspacesFiltering!]
+    $filters: FilterGroup
   ) {
     workspaces(
       first: $count
@@ -116,7 +116,11 @@ const DashboardSettings = () => {
                 count: 50,
                 orderBy: 'name',
                 orderMode: 'asc',
-                filters: [{ key: 'type', values: ['dashboard'] }],
+                filters: {
+                  mode: 'and',
+                  filters: [{ key: 'type', values: ['dashboard'] }],
+                  filterGroups: [],
+                },
               }}
               render={({ props }) => {
                 if (props) {

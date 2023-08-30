@@ -39,9 +39,9 @@ const threatActorGroupResolvers = {
   },
   ThreatActorsFilter: {
     createdBy: buildRefRelationKey(RELATION_CREATED_BY),
-    assigneeTo: buildRefRelationKey(RELATION_OBJECT_ASSIGNEE),
+    objectAssignee: buildRefRelationKey(RELATION_OBJECT_ASSIGNEE),
     markedBy: buildRefRelationKey(RELATION_OBJECT_MARKING),
-    labelledBy: buildRefRelationKey(RELATION_OBJECT_LABEL),
+    objectLabel: buildRefRelationKey(RELATION_OBJECT_LABEL),
     creator: 'creator_id',
   },
   Mutation: {

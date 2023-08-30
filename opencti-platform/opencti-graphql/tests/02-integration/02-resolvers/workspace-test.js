@@ -17,7 +17,7 @@ const LIST_QUERY = gql`
     $after: ID
     $orderBy: WorkspacesOrdering
     $orderMode: OrderingMode
-    $filters: [WorkspacesFiltering!]
+    $filters: FilterGroup
     $filterMode: FilterMode
     $includeAuthorities: Boolean
     $search: String

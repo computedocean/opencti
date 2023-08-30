@@ -44,9 +44,9 @@ const threatActorIndividualResolvers: Resolvers = {
     createdBy: buildRefRelationKey(RELATION_CREATED_BY),
     bornIn: buildRefRelationKey(RELATION_BORN_IN),
     ethnicity: buildRefRelationKey(RELATION_ETHNICITY),
-    assigneeTo: buildRefRelationKey(RELATION_OBJECT_ASSIGNEE),
+    objectAssignee: buildRefRelationKey(RELATION_OBJECT_ASSIGNEE),
     markedBy: buildRefRelationKey(RELATION_OBJECT_MARKING),
-    labelledBy: buildRefRelationKey(RELATION_OBJECT_LABEL),
+    objectLabel: buildRefRelationKey(RELATION_OBJECT_LABEL),
     creator: 'creator_id',
   },
   Mutation: {

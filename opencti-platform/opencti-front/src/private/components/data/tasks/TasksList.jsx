@@ -22,6 +22,7 @@ import Slide from '@mui/material/Slide';
 import { interval } from 'rxjs';
 import { Delete } from 'mdi-material-ui';
 import Chip from '@mui/material/Chip';
+import TasksFilterValueContainer from '../../../../components/TasksFilterValueContainer';
 import TaskStatus from '../../../../components/TaskStatus';
 import inject18n from '../../../../components/i18n';
 import { FIVE_SECONDS } from '../../../../utils/Time';
@@ -235,56 +236,11 @@ class TasksListComponent extends Component {
                         </span>
                       )}
                       {task.type !== 'RULE'
-                        && (filters ? (
-                          R.map((currentFilter) => {
-                            const label = `${truncate(
-                              t(`filter_${currentFilter[0]}`),
-                              20,
-                            )}`;
-                            const localFilterMode = currentFilter[0].endsWith(
-                              'not_eq',
-                            )
-                              ? t('AND')
-                              : t('OR');
-                            const values = (
-                              <span>
-                                {R.map(
-                                  (o) => (
-                                    <span key={o.value}>
-                                      {o.value && o.value.length > 0
-                                        ? truncate(o.value, 15)
-                                        : t('No label')}{' '}
-                                      {R.last(currentFilter[1]).value
-                                        !== o.value && (
-                                        <code>{localFilterMode}</code>
-                                      )}{' '}
-                                    </span>
-                                  ),
-                                  currentFilter[1],
-                                )}
-                              </span>
-                            );
-                            return (
-                              <span key={currentFilter[0]}>
-                                <Chip
-                                  classes={{ root: classes.filter }}
-                                  label={
-                                    <div>
-                                      <strong>{label}</strong>: {values}
-                                    </div>
-                                  }
-                                />
-                                {R.last(R.toPairs(filters))[0]
-                                  !== currentFilter[0] && (
-                                  <Chip
-                                    classes={{ root: classes.operator }}
-                                    label={t('AND')}
-                                  />
-                                )}
-                              </span>
-                            );
-                          }, R.toPairs(filters))
-                        ) : (
+                        && (filters?.filters
+                          ? <TasksFilterValueContainer
+                            filters={filters}
+                          ></TasksFilterValueContainer>
+                          : (
                           <Chip
                             classes={{ root: classes.filter }}
                             label={
@@ -294,7 +250,7 @@ class TasksListComponent extends Component {
                               </div>
                             }
                           />
-                        ))}
+                          ))}
                       {task.type === 'RULE' && (
                         <Chip
                           classes={{ root: classes.filter }}
@@ -540,7 +496,7 @@ export const tasksListQuery = graphql`
     $orderBy: BackgroundTasksOrdering
     $orderMode: OrderingMode
     $includeAuthorities: Boolean
-    $filters: [BackgroundTasksFiltering]
+    $filters: FilterGroup
   ) {
     ...TasksList_data
       @arguments(
@@ -563,7 +519,7 @@ const TasksList = createRefetchContainer(
         orderBy: { type: "BackgroundTasksOrdering", defaultValue: created_at }
         orderMode: { type: "OrderingMode", defaultValue: desc }
         includeAuthorities: { type: "Boolean", defaultValue: true }
-        filters: { type: "[BackgroundTasksFiltering]" }
+        filters: { type: "FilterGroup" }
       ) {
         backgroundTasks(
           first: $count

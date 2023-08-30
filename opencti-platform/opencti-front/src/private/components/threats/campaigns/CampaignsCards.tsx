@@ -26,7 +26,7 @@ export const campaignsCardsQuery = graphql`
         $cursor: ID
         $orderBy: CampaignsOrdering
         $orderMode: OrderingMode
-        $filters: [CampaignsFiltering]
+        $filters: FilterGroup
     ) {
         ...CampaignsCards_data
         @arguments(
@@ -48,7 +48,7 @@ export const campaignsCardsFragment = graphql`
             cursor: { type: "ID" }
             orderBy: { type: "CampaignsOrdering", defaultValue: name }
             orderMode: { type: "OrderingMode", defaultValue: asc }
-            filters: { type: "[CampaignsFiltering]" }
+            filters: { type: "FilterGroup" }
         )
         @refetchable(queryName: "CampaignsRefetchQuery") {
             campaigns(

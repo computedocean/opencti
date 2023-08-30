@@ -174,6 +174,8 @@ class ListLines extends Component {
       handleAddFilter,
       handleRemoveFilter,
       handleSwitchFilter,
+      handleSwitchGlobalMode,
+      handleSwitchLocalMode,
       handleToggleExports,
       handleToggleSelectAll,
       selectAll,
@@ -247,6 +249,8 @@ class ListLines extends Component {
                 handleAddFilter={handleAddFilter}
                 handleSwitchFilter={handleSwitchFilter}
                 handleRemoveFilter={handleRemoveFilter}
+                handleSwitchGlobalMode={handleSwitchGlobalMode}
+                handleSwitchLocalMode={handleSwitchLocalMode}
                 availableEntityTypes={availableEntityTypes}
                 availableRelationshipTypes={availableRelationshipTypes}
                 availableRelationFilterTypes={availableRelationFilterTypes}
@@ -254,13 +258,19 @@ class ListLines extends Component {
             )}
             {(!availableFilterKeys || availableFilterKeys.length === 0)
               && !noHeaders
-              && !noFilters && <div style={{ height: 38 }}> &nbsp; </div>}
-            <FilterIconButton
-              availableFilterKeys={availableFilterKeys}
-              filters={filters}
-              handleRemoveFilter={handleRemoveFilter}
-              redirection
-            />
+              && !noFilters
+              && <div style={{ height: 38 }}> &nbsp; </div>
+            }
+            {filters?.filters && filters.filters.length > 0
+              && <FilterIconButton
+                availableFilterKeys={availableFilterKeys}
+                filters={filters}
+                handleRemoveFilter={handleRemoveFilter}
+                handleSwitchGlobalMode={handleSwitchGlobalMode}
+                handleSwitchLocalMode={handleSwitchLocalMode}
+                redirection
+              />
+            }
           </div>
         )}
         <div className={classes.views}>
@@ -632,6 +642,8 @@ ListLines.propTypes = {
   handleAddFilter: PropTypes.func,
   handleRemoveFilter: PropTypes.func,
   handleSwitchFilter: PropTypes.func,
+  handleSwitchGlobalMode: PropTypes.func,
+  handleSwitchLocalMode: PropTypes.func,
   handleToggleExports: PropTypes.func,
   selectAll: PropTypes.bool,
   openExports: PropTypes.bool,

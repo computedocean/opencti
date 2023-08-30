@@ -2,7 +2,7 @@ import React, { FunctionComponent } from 'react';
 import useQueryLoading from '../../../../utils/hooks/useQueryLoading';
 import Loader, { LoaderVariant } from '../../../../components/Loader';
 import {
-  StixCoreObjectQuickSubscriptionContentPaginationQuery, TriggerFilter,
+  StixCoreObjectQuickSubscriptionContentPaginationQuery,
 } from './__generated__/StixCoreObjectQuickSubscriptionContentPaginationQuery.graphql';
 import StixCoreObjectQuickSubscriptionContent, {
   stixCoreObjectQuickSubscriptionContentQuery,
@@ -15,18 +15,24 @@ interface StixCoreObjectQuickSubscriptionProps {
 
 const StixCoreObjectQuickSubscription: FunctionComponent<StixCoreObjectQuickSubscriptionProps> = ({ instanceId, instanceName }) => {
   const paginationOptions = {
-    filters: [
-      {
-        key: ['filters'] as TriggerFilter[],
-        values: [instanceId],
-        operator: 'match',
-      },
-      {
-        key: ['instance_trigger'] as TriggerFilter[],
-        values: [true.toString()],
-        operator: 'match',
-      },
-    ],
+    filters: {
+      mode: 'and',
+      filterGroups: [],
+      filters: [
+        {
+          key: ['filters'],
+          values: [instanceId],
+          operator: 'match',
+          mode: 'or',
+        },
+        {
+          key: ['instance_trigger'],
+          values: [true.toString()],
+          operator: 'match',
+          mode: 'or',
+        },
+      ],
+    },
   };
   const queryRef = useQueryLoading<StixCoreObjectQuickSubscriptionContentPaginationQuery>(
     stixCoreObjectQuickSubscriptionContentQuery,
@@ -37,7 +43,12 @@ const StixCoreObjectQuickSubscription: FunctionComponent<StixCoreObjectQuickSubs
     <div>
       {queryRef
         && <React.Suspense fallback={<Loader variant={LoaderVariant.inElement}/>}>
-          <StixCoreObjectQuickSubscriptionContent queryRef={queryRef} paginationOptions={paginationOptions} instanceId={instanceId} instanceName={instanceName} />
+          <StixCoreObjectQuickSubscriptionContent
+            queryRef={queryRef}
+            paginationOptions={paginationOptions}
+            instanceId={instanceId}
+            instanceName={instanceName}
+          />
         </React.Suspense>
       }
     </div>

@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { dissoc, filter } from 'ramda';
+import { dissoc } from 'ramda';
 import { v4 as uuidv4 } from 'uuid';
 import { delEditContext, notify, setEditContext } from '../database/redis';
 import {
@@ -52,6 +52,7 @@ import {
   stixObjectOrRelationshipAddRefRelation,
   stixObjectOrRelationshipDeleteRefRelation
 } from './stixObjectOrStixRelationship';
+import { addFilter } from '../utils/filtering';
 
 export const findById = (context, user, stixCyberObservableId) => {
   return storeLoadById(context, user, stixCyberObservableId, ABSTRACT_STIX_CYBER_OBSERVABLE);
@@ -60,7 +61,7 @@ export const findById = (context, user, stixCyberObservableId) => {
 export const findAll = async (context, user, args) => {
   let types = [];
   if (args.types && args.types.length > 0) {
-    types = filter((type) => isStixCyberObservable(type), args.types);
+    types = args.types.filter((type) => isStixCyberObservable(type));
   }
   if (types.length === 0) {
     types.push(ABSTRACT_STIX_CYBER_OBSERVABLE);
@@ -342,7 +343,7 @@ export const stixCyberObservableDistribution = async (context, user, args) => {
 
 export const stixCyberObservableDistributionByEntity = async (context, user, args) => {
   const { relationship_type, objectId, types = [ABSTRACT_STIX_CYBER_OBSERVABLE] } = args;
-  const filters = [{ key: [relationship_type.map((n) => buildRefRelationKey(n, '*'))], values: [objectId] }, ...(args.filters || [])];
+  const filters = addFilter(args.filters, relationship_type.map((n) => buildRefRelationKey(n, '*')), objectId);
   return distributionEntities(context, user, types, { ...args, filters });
 };
 

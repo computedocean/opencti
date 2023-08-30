@@ -22,7 +22,7 @@ const toolResolvers = {
   ToolsFilter: {
     createdBy: buildRefRelationKey(RELATION_CREATED_BY),
     markedBy: buildRefRelationKey(RELATION_OBJECT_MARKING),
-    labelledBy: buildRefRelationKey(RELATION_OBJECT_LABEL),
+    objectLabel: buildRefRelationKey(RELATION_OBJECT_LABEL),
   },
   Tool: {
     killChainPhases: (tool, _, context) => killChainPhaseLoader.load(tool.id, context, context.user),

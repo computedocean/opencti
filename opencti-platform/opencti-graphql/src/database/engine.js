@@ -38,7 +38,8 @@ import {
   RELATION_KILL_CHAIN_PHASE,
   RELATION_OBJECT_ASSIGNEE,
   RELATION_OBJECT_LABEL,
-  RELATION_OBJECT_MARKING, RELATION_OBJECT_PARTICIPANT,
+  RELATION_OBJECT_MARKING,
+  RELATION_OBJECT_PARTICIPANT,
 } from '../schema/stixRefRelationship';
 import {
   ABSTRACT_BASIC_RELATIONSHIP,
@@ -72,13 +73,7 @@ import { isStixObject } from '../schema/stixCoreObject';
 import { isBasicRelationship, isStixRelationshipExceptRef } from '../schema/stixRelationship';
 import { RELATION_INDICATES } from '../schema/stixCoreRelationship';
 import { INTERNAL_FROM_FIELD, INTERNAL_TO_FIELD } from '../schema/identifier';
-import {
-  BYPASS,
-  computeUserMemberAccessIds,
-  INTERNAL_USERS,
-  isBypassUser,
-  MEMBER_ACCESS_ALL,
-} from '../utils/access';
+import { BYPASS, computeUserMemberAccessIds, INTERNAL_USERS, isBypassUser, MEMBER_ACCESS_ALL, } from '../utils/access';
 import { isSingleRelationsRef, } from '../schema/stixEmbeddedRelationship';
 import { now, runtimeFieldObservableValueScript } from '../utils/format';
 import { ENTITY_TYPE_MARKING_DEFINITION } from '../schema/stixMetaObject';
@@ -89,6 +84,7 @@ import { isBooleanAttribute, isDateAttribute, isDateNumericOrBooleanAttribute } 
 import { convertTypeToStixType } from './stix-converter';
 import { extractEntityRepresentativeName } from './entity-representative';
 import { ENTITY_TYPE_IDENTITY_ORGANIZATION } from '../modules/organization/organization-types';
+import { checkedAndConvertedFilters } from '../utils/filtering';
 
 const ELK_ENGINE = 'elk';
 const OPENSEARCH_ENGINE = 'opensearch';
@@ -891,8 +887,8 @@ export const RUNTIME_ATTRIBUTES = {
       return R.mergeAll(identities.map((i) => ({ [i.internal_id]: i.definition })));
     },
   },
-  assigneeTo: {
-    field: 'assigneeTo.keyword',
+  objectAssignee: {
+    field: 'objectAssignee.keyword',
     type: 'keyword',
     getSource: async () => `
         if (doc.containsKey('rel_object-assignee.internal_id')) {
@@ -1305,6 +1301,194 @@ export const elGenerateFullTextSearchShould = (search, args = {}) => {
 
 const BASE_FIELDS = ['_index', 'internal_id', 'standard_id', 'sort', 'base_type', 'entity_type',
   'connections', 'first_seen', 'last_seen', 'start_time', 'stop_time'];
+
+const buildLocalMustFilter = async (context, user, validFilter) => {
+  const valuesFiltering = [];
+  const noValuesFiltering = [];
+  const { key, values, nested, operator = 'eq', mode: localFilterMode = 'or' } = validFilter;
+  const arrayKeys = Array.isArray(key) ? key : [key];
+  // in case we want to filter by source reliability (reliability of author)
+  // we need to find all authors filtered by reliability and filter on these authors
+  const sourceReliabilityFilter = arrayKeys.find((k) => k === 'source_reliability');
+  if (sourceReliabilityFilter) {
+    const authorTypes = [
+      ENTITY_TYPE_IDENTITY_INDIVIDUAL,
+      ENTITY_TYPE_IDENTITY_ORGANIZATION,
+      ENTITY_TYPE_IDENTITY_SYSTEM
+    ];
+    const reliabilityFilter = { key: ['x_opencti_reliability'], operator, values, localFilterMode };
+    const opts = { types: authorTypes, connectionFormat: false, filters: [reliabilityFilter] };
+    const authors = await elList(context, user, READ_INDEX_STIX_DOMAIN_OBJECTS, opts);
+    if (authors.length > 0) {
+      arrayKeys.splice(0, 1);
+      arrayKeys.push('rel_created-by.internal_id');
+      values.splice(0, values.length);
+      authors.forEach((author) => values.push(author.internal_id));
+    }
+  }
+  // In case of entity_type filters, we also look by default in the parent_types property.
+  const validKeys = R.uniq(arrayKeys.includes('entity_type') ? [...arrayKeys, 'parent_types'] : arrayKeys);
+  // TODO IF KEY is PART OF Rule we need to add extra fields search
+  // TODO Add connections like filters to have native fromId, toId filters handling.
+  // See opencti-front\src\private\components\events\StixSightingRelationships.tsx
+  if (nested) {
+    if (validKeys.length > 1) {
+      throw UnsupportedError('[SEARCH] Must have only one field', validKeys);
+    }
+    const nestedMust = [];
+    const nestedMustNot = [];
+    for (let nestIndex = 0; nestIndex < nested.length; nestIndex += 1) {
+      const nestedElement = nested[nestIndex];
+      const parentKey = validKeys.at(0);
+      const { key: nestedKey, values: nestedValues, operator: nestedOperator = 'eq' } = nestedElement;
+      const nestedShould = [];
+      for (let i = 0; i < nestedValues.length; i += 1) {
+        const nestedFieldKey = `${parentKey}.${nestedKey}`;
+        const nestedSearchValues = nestedValues[i].toString();
+        if (nestedOperator === 'wildcard') {
+          nestedShould.push({ query_string: { query: `${nestedSearchValues}`, fields: [nestedFieldKey] } });
+        } else if (nestedOperator === 'not_eq') {
+          nestedMustNot.push({ match_phrase: { [nestedFieldKey]: nestedSearchValues } });
+        } else {
+          nestedShould.push({ match_phrase: { [nestedFieldKey]: nestedSearchValues } });
+        }
+      }
+      const should = {
+        bool: {
+          should: nestedShould,
+          minimum_should_match: localFilterMode === 'or' ? 1 : nestedShould.length,
+        },
+      };
+      nestedMust.push(should);
+    }
+    const nestedQuery = {
+      path: R.head(validKeys),
+      query: {
+        bool: {
+          must: nestedMust,
+          must_not: nestedMustNot,
+        },
+      },
+    };
+    return { nested: nestedQuery };
+  }
+  for (let i = 0; i < values.length; i += 1) {
+    if (values[i] === null) {
+      if (validKeys.length > 1) {
+        throw UnsupportedError('[SEARCH] Must have only one field', validKeys);
+      }
+      if (operator === 'eq') {
+        valuesFiltering.push({
+          bool: {
+            must_not: {
+              exists: {
+                field: R.head(validKeys)
+              }
+            }
+          }
+        });
+      } else if (operator === 'not_eq') {
+        valuesFiltering.push({ exists: { field: R.head(validKeys) } });
+      }
+    } else if (values[i] === 'EXISTS') {
+      if (validKeys.length > 1) {
+        throw UnsupportedError('[SEARCH] Must have only one field', validKeys);
+      }
+      valuesFiltering.push({ exists: { field: R.head(validKeys) } });
+    } else if (operator === 'eq') {
+      valuesFiltering.push({
+        multi_match: {
+          fields: validKeys.map((k) => `${isDateNumericOrBooleanAttribute(k) ? k : `${k}.keyword`}`),
+          query: values[i].toString(),
+        },
+      });
+    } else if (operator === 'not_eq') {
+      noValuesFiltering.push({
+        multi_match: {
+          fields: validKeys.map((k) => `${isDateNumericOrBooleanAttribute(k) ? k : `${k}.keyword`}`),
+          query: values[i].toString(),
+        },
+      });
+    } else if (operator === 'match') {
+      valuesFiltering.push({
+        multi_match: {
+          fields: validKeys,
+          query: values[i].toString(),
+        },
+      });
+    } else if (operator === 'wildcard') {
+      valuesFiltering.push({
+        query_string: {
+          query: `"${values[i].toString()}"`,
+          fields: validKeys,
+        },
+      });
+    } else if (operator === 'script') {
+      valuesFiltering.push({
+        script: {
+          script: values[i].toString()
+        },
+      });
+    } else {
+      if (validKeys.length > 1) {
+        throw UnsupportedError('[SEARCH] Must have only one field', validKeys);
+      }
+      valuesFiltering.push({ range: { [R.head(validKeys)]: { [operator]: values[i] } } });
+    }
+  }
+  if (valuesFiltering.length > 0) {
+    return {
+      bool: {
+        should: valuesFiltering,
+        minimum_should_match: localFilterMode === 'or' ? 1 : valuesFiltering.length,
+      },
+    };
+  }
+  if (noValuesFiltering.length > 0) {
+    return {
+      bool: {
+        should: noValuesFiltering.map((o) => ({
+          bool: {
+            must_not: [o]
+          }
+        })),
+        minimum_should_match: localFilterMode === 'or' ? 1 : noValuesFiltering.length,
+      },
+    };
+  }
+  throw UnsupportedError('[FILTER] invalid filter', validFilter);
+};
+
+const buildSubQueryForFilterGroup = async (context, user, filterGroup) => {
+  const { mode = 'and' } = filterGroup;
+  const filters = filterGroup.filters ?? filterGroup; // TODO remove support both filterGroup and filters as entry
+  const subFilterGroups = filterGroup.filterGroups ?? [];
+  const localMustFilters = [];
+  for (let index = 0; index < subFilterGroups.length; index += 1) {
+    const group = subFilterGroups[index];
+    const subQuery = await buildSubQueryForFilterGroup(context, user, group);
+    localMustFilters.push(subQuery);
+  }
+  for (let index = 0; index < filters.length; index += 1) {
+    const filter = filters[index];
+    const isValidFilter = filter?.values?.length > 0 || filter?.nested?.length > 0;
+    if (isValidFilter) {
+      const localMustFilter = await buildLocalMustFilter(context, user, filter);
+      localMustFilters.push(localMustFilter);
+    }
+  }
+  if (localMustFilters.length > 0) {
+    const query = {
+      bool: {
+        should: localMustFilters,
+        minimum_should_match: mode === 'or' ? 1 : localMustFilters.length,
+      }
+    };
+    return query;
+  }
+  return null;
+};
+
 const elQueryBodyBuilder = async (context, user, options) => {
   // eslint-disable-next-line no-use-before-define
   const { ids = [], first = 200, after, orderBy = null, orderMode = 'asc', noSize = false, noSort = false, intervalInclude = false } = options;
@@ -1318,6 +1502,7 @@ const elQueryBodyBuilder = async (context, user, options) => {
   const accessMust = markingRestrictions.must;
   const accessMustNot = markingRestrictions.must_not;
   const mustFilters = [];
+  // Handle ids
   if (ids.length > 0) {
     const idsTermsPerType = [];
     const elementTypes = [ID_INTERNAL, ID_STANDARD, IDS_STIX];
@@ -1328,6 +1513,7 @@ const elQueryBodyBuilder = async (context, user, options) => {
     }
     mustFilters.push({ bool: { should: idsTermsPerType, minimum_should_match: 1 } });
   }
+  // Handle dates
   if (startDate && endDate) {
     dateFilter.push({
       range: {
@@ -1358,6 +1544,7 @@ const elQueryBodyBuilder = async (context, user, options) => {
     });
   }
   mustFilters.push(...dateFilter);
+  // Handle types
   if (types !== null && types.length > 0) {
     const should = R.flatten(
       types.map((typeValue) => {
@@ -1369,169 +1556,12 @@ const elQueryBodyBuilder = async (context, user, options) => {
     );
     mustFilters.push({ bool: { should, minimum_should_match: 1 } });
   }
-  const validFilters = R.filter((f) => f?.values?.length > 0 || f?.nested?.length > 0, filters || []);
-  if (validFilters.length > 0) {
-    for (let index = 0; index < validFilters.length; index += 1) {
-      const valuesFiltering = [];
-      const noValuesFiltering = [];
-      const { key, values, nested, operator = 'eq', filterMode: localFilterMode = 'or' } = validFilters[index];
-      const arrayKeys = Array.isArray(key) ? key : [key];
-      // in case we want to filter by source reliability (reliability of author)
-      // we need to find all authors filtered by reliability and filter on these authors
-      const sourceReliabilityFilter = arrayKeys.find((k) => k === 'source_reliability');
-      if (sourceReliabilityFilter) {
-        const authorTypes = [
-          ENTITY_TYPE_IDENTITY_INDIVIDUAL,
-          ENTITY_TYPE_IDENTITY_ORGANIZATION,
-          ENTITY_TYPE_IDENTITY_SYSTEM
-        ];
-        const reliabilityFilter = { key: ['x_opencti_reliability'], operator, values, localFilterMode };
-        const opts = { types: authorTypes, connectionFormat: false, filters: [reliabilityFilter] };
-        const authors = await elList(context, user, READ_INDEX_STIX_DOMAIN_OBJECTS, opts);
-        if (authors.length > 0) {
-          arrayKeys.splice(0, 1);
-          arrayKeys.push('rel_created-by.internal_id');
-          values.splice(0, values.length);
-          authors.forEach((author) => values.push(author.internal_id));
-        }
-      }
-      // In case of entity_type filters, we also look by default in the parent_types property.
-      const validKeys = R.uniq(arrayKeys.includes('entity_type') ? [...arrayKeys, 'parent_types'] : arrayKeys);
-      // TODO IF KEY is PART OF Rule we need to add extra fields search
-      // TODO Add connections like filters to have native fromId, toId filters handling.
-      // See opencti-front\src\private\components\events\StixSightingRelationships.tsx
-      if (nested) {
-        if (validKeys.length > 1) {
-          throw UnsupportedError('[SEARCH] Must have only one field', validKeys);
-        }
-        const nestedMust = [];
-        const nestedMustNot = [];
-        for (let nestIndex = 0; nestIndex < nested.length; nestIndex += 1) {
-          const nestedElement = nested[nestIndex];
-          const parentKey = validKeys.at(0);
-          const { key: nestedKey, values: nestedValues, operator: nestedOperator = 'eq' } = nestedElement;
-          const nestedShould = [];
-          for (let i = 0; i < nestedValues.length; i += 1) {
-            const nestedFieldKey = `${parentKey}.${nestedKey}`;
-            const nestedSearchValues = nestedValues[i].toString();
-            if (nestedOperator === 'wildcard') {
-              nestedShould.push({ query_string: { query: `${nestedSearchValues}`, fields: [nestedFieldKey] } });
-            } else if (nestedOperator === 'not_eq') {
-              nestedMustNot.push({ match_phrase: { [nestedFieldKey]: nestedSearchValues } });
-            } else {
-              nestedShould.push({ match_phrase: { [nestedFieldKey]: nestedSearchValues } });
-            }
-          }
-          const should = {
-            bool: {
-              should: nestedShould,
-              minimum_should_match: localFilterMode === 'or' ? 1 : nestedShould.length,
-            },
-          };
-          nestedMust.push(should);
-        }
-        const nestedQuery = {
-          path: R.head(validKeys),
-          query: {
-            bool: {
-              must: nestedMust,
-              must_not: nestedMustNot,
-            },
-          },
-        };
-        mustFilters.push({ nested: nestedQuery });
-      } else {
-        for (let i = 0; i < values.length; i += 1) {
-          if (values[i] === null) {
-            if (validKeys.length > 1) {
-              throw UnsupportedError('[SEARCH] Must have only one field', validKeys);
-            }
-            if (operator === 'eq') {
-              valuesFiltering.push({
-                bool: {
-                  must_not: {
-                    exists: {
-                      field: R.head(validKeys)
-                    }
-                  }
-                }
-              });
-            } else if (operator === 'not_eq') {
-              valuesFiltering.push({ exists: { field: R.head(validKeys) } });
-            }
-          } else if (values[i] === 'EXISTS') {
-            if (validKeys.length > 1) {
-              throw UnsupportedError('[SEARCH] Must have only one field', validKeys);
-            }
-            valuesFiltering.push({ exists: { field: R.head(validKeys) } });
-          } else if (operator === 'eq') {
-            valuesFiltering.push({
-              multi_match: {
-                fields: validKeys.map((k) => `${isDateNumericOrBooleanAttribute(k) ? k : `${k}.keyword`}`),
-                query: values[i].toString(),
-              },
-            });
-          } else if (operator === 'not_eq') {
-            noValuesFiltering.push({
-              multi_match: {
-                fields: validKeys.map((k) => `${isDateNumericOrBooleanAttribute(k) ? k : `${k}.keyword`}`),
-                query: values[i].toString(),
-              },
-            });
-          } else if (operator === 'match') {
-            valuesFiltering.push({
-              multi_match: {
-                fields: validKeys,
-                query: values[i].toString(),
-              },
-            });
-          } else if (operator === 'wildcard') {
-            valuesFiltering.push({
-              query_string: {
-                query: `"${values[i].toString()}"`,
-                fields: validKeys,
-              },
-            });
-          } else if (operator === 'script') {
-            valuesFiltering.push({
-              script: {
-                script: values[i].toString()
-              },
-            });
-          } else {
-            if (validKeys.length > 1) {
-              throw UnsupportedError('[SEARCH] Must have only one field', validKeys);
-            }
-            valuesFiltering.push({ range: { [R.head(validKeys)]: { [operator]: values[i] } } });
-          }
-        }
-        if (valuesFiltering.length > 0) {
-          mustFilters.push(
-            {
-              bool: {
-                should: valuesFiltering,
-                minimum_should_match: localFilterMode === 'or' ? 1 : valuesFiltering.length,
-              },
-            },
-          );
-        }
-        if (noValuesFiltering.length > 0) {
-          mustFilters.push(
-            {
-              bool: {
-                should: noValuesFiltering.map((o) => ({
-                  bool: {
-                    must_not: [o]
-                  }
-                })),
-                minimum_should_match: localFilterMode === 'or' ? 1 : noValuesFiltering.length,
-              },
-            }
-          );
-        }
-      }
-    }
+  // Handle filters
+  const filtersSubQuery = await buildSubQueryForFilterGroup(context, user, filters);
+  if (filtersSubQuery) {
+    mustFilters.push(filtersSubQuery);
   }
+  // Handle search
   if (search !== null && search.length > 0) {
     const shouldSearch = elGenerateFullTextSearchShould(search, options);
     const bool = {
@@ -1608,7 +1638,8 @@ const elQueryBodyBuilder = async (context, user, options) => {
   return body;
 };
 export const elCount = async (context, user, indexName, options = {}) => {
-  const body = await elQueryBodyBuilder(context, user, { ...options, noSize: true, noSort: true });
+  const convertedFilters = checkedAndConvertedFilters(options.filters, options.types ?? []);
+  const body = await elQueryBodyBuilder(context, user, { ...options, filters: convertedFilters, noSize: true, noSort: true });
   const query = { index: indexName, body };
   logApp.debug('[SEARCH] elCount', { query });
   return engine.count(query)
@@ -1913,6 +1944,7 @@ export const elPaginate = async (context, user, indexName, options = {}) => {
     );
 };
 export const elList = async (context, user, indexName, options = {}) => {
+  const convertedFilters = checkedAndConvertedFilters(options.filters, options.types ?? []);
   const { first = MAX_SEARCH_SIZE, infinite = false } = options;
   let hasNextPage = true;
   let continueProcess = true;
@@ -1929,7 +1961,7 @@ export const elList = async (context, user, indexName, options = {}) => {
   };
   while (continueProcess && hasNextPage) {
     // Force options to prevent connection format and manage search after
-    const opts = { ...options, first, after: searchAfter, connectionFormat: false };
+    const opts = { ...options, filters: convertedFilters, first, after: searchAfter, connectionFormat: false };
     const elements = await elPaginate(context, user, indexName, opts);
     if (!infinite && (elements.length === 0 || elements.length < first)) {
       if (elements.length > 0) {
