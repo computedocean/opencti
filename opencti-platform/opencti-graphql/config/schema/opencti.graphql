@@ -2070,6 +2070,8 @@ interface StixCoreObject {
   created_at: DateTime!
   updated_at: DateTime!
   # StixCoreObject
+  is_from_relation_inferred: Boolean
+  representative: Representative!
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -2269,6 +2271,8 @@ interface StixDomainObject {
   created_at: DateTime!
   updated_at: DateTime!
   # StixCoreObject
+  representative: Representative!
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -2446,6 +2450,7 @@ type AttackPattern implements BasicObject & StixObject & StixCoreObject & StixDo
   # inferences
   x_opencti_inferences: [Inference]
   # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -2640,6 +2645,7 @@ type Campaign implements BasicObject & StixObject & StixCoreObject & StixDomainO
   # inferences
   x_opencti_inferences: [Inference]
   # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -2832,6 +2838,7 @@ interface Container {
   created_at: DateTime!
   updated_at: DateTime!
   # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -3007,6 +3014,7 @@ type Note implements BasicObject & StixObject & StixCoreObject & StixDomainObjec
   # inferences
   x_opencti_inferences: [Inference]
   # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -3236,6 +3244,7 @@ type ObservedData implements BasicObject & StixObject & StixCoreObject & StixDom
   # inferences
   x_opencti_inferences: [Inference]
   # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -3442,6 +3451,7 @@ type Opinion implements BasicObject & StixObject & StixCoreObject & StixDomainOb
   # inferences
   x_opencti_inferences: [Inference]
   # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -3670,6 +3680,7 @@ type Report implements BasicObject & StixObject & StixCoreObject & StixDomainObj
   # inferences
   x_opencti_inferences: [Inference]
   # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -3882,7 +3893,8 @@ type CourseOfAction implements BasicObject & StixObject & StixCoreObject & StixD
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -4068,6 +4080,7 @@ interface Identity {
   created_at: DateTime!
   updated_at: DateTime!
   # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -4251,7 +4264,8 @@ type Individual implements BasicObject & StixObject & StixCoreObject & StixDomai
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -4440,7 +4454,8 @@ type Sector implements BasicObject & StixObject & StixCoreObject & StixDomainObj
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -4625,7 +4640,8 @@ type System implements BasicObject & StixObject & StixCoreObject & StixDomainObj
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -4837,7 +4853,8 @@ type Indicator implements BasicObject & StixObject & StixCoreObject & StixDomain
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -5044,7 +5061,8 @@ type Infrastructure implements BasicObject & StixObject & StixCoreObject & StixD
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -5229,7 +5247,8 @@ type IntrusionSet implements BasicObject & StixObject & StixCoreObject & StixDom
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -5418,7 +5437,8 @@ interface Location {
   spec_version: String!
   created_at: DateTime!
   updated_at: DateTime!
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -5597,7 +5617,8 @@ type Position implements BasicObject & StixObject & StixCoreObject & StixDomainO
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -5785,7 +5806,8 @@ type City implements BasicObject & StixObject & StixCoreObject & StixDomainObjec
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -5966,7 +5988,8 @@ type Country implements BasicObject & StixObject & StixCoreObject & StixDomainOb
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -6144,7 +6167,8 @@ type Region implements BasicObject & StixObject & StixCoreObject & StixDomainObj
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -6339,7 +6363,8 @@ type Malware implements BasicObject & StixObject & StixCoreObject & StixDomainOb
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -6536,7 +6561,8 @@ interface ThreatActor implements BasicObject & StixObject & StixCoreObject & Sti
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -6673,7 +6699,8 @@ type ThreatActorGroup implements BasicObject & StixObject & StixCoreObject & Sti
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -6870,7 +6897,8 @@ type Tool implements BasicObject & StixObject & StixCoreObject & StixDomainObjec
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -7057,7 +7085,8 @@ type Vulnerability implements BasicObject & StixObject & StixCoreObject & StixDo
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -7257,7 +7286,8 @@ type Incident implements BasicObject & StixObject & StixCoreObject & StixDomainO
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -7457,7 +7487,8 @@ interface StixCyberObservable {
   spec_version: String!
   created_at: DateTime!
   updated_at: DateTime!
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -7561,7 +7592,8 @@ type AutonomousSystem implements BasicObject & StixObject & StixCoreObject & Sti
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -7675,7 +7707,8 @@ type Directory implements BasicObject & StixObject & StixCoreObject & StixCyberO
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -7793,7 +7826,8 @@ type DomainName implements BasicObject & StixObject & StixCoreObject & StixCyber
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -7903,7 +7937,8 @@ type EmailAddr implements BasicObject & StixObject & StixCoreObject & StixCyberO
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -8015,7 +8050,8 @@ type EmailMessage implements BasicObject & StixObject & StixCoreObject & StixCyb
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -8137,7 +8173,8 @@ type EmailMimePartType implements BasicObject & StixObject & StixCoreObject & St
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -8267,7 +8304,8 @@ interface HashedObservable {
   spec_version: String!
   created_at: DateTime!
   updated_at: DateTime!
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -8373,7 +8411,8 @@ type Artifact implements BasicObject & StixObject & StixCoreObject & StixCyberOb
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -8496,7 +8535,8 @@ type StixFile implements BasicObject & StixObject & StixCoreObject & StixCyberOb
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -8628,7 +8668,8 @@ type X509Certificate implements BasicObject & StixObject & StixCoreObject & Stix
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -8795,7 +8836,8 @@ type IPv4Addr implements BasicObject & StixObject & StixCoreObject & StixCyberOb
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -8908,7 +8950,8 @@ type IPv6Addr implements BasicObject & StixObject & StixCoreObject & StixCyberOb
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -9019,7 +9062,8 @@ type MacAddr implements BasicObject & StixObject & StixCoreObject & StixCyberObs
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -9129,7 +9173,8 @@ type Mutex implements BasicObject & StixObject & StixCoreObject & StixCyberObser
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -9239,7 +9284,8 @@ type NetworkTraffic implements BasicObject & StixObject & StixCoreObject & StixC
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -9368,7 +9414,8 @@ type Process implements BasicObject & StixObject & StixCoreObject & StixCyberObs
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -9524,7 +9571,8 @@ type Software implements BasicObject & StixObject & StixCoreObject & StixCyberOb
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -9653,7 +9701,8 @@ type Url implements BasicObject & StixObject & StixCoreObject & StixCyberObserva
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -9763,7 +9812,8 @@ type UserAccount implements BasicObject & StixObject & StixCoreObject & StixCybe
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -9900,7 +9950,8 @@ type WindowsRegistryKey implements BasicObject & StixObject & StixCoreObject & S
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -10014,7 +10065,8 @@ type WindowsRegistryValueType implements BasicObject & StixObject & StixCoreObje
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -10128,7 +10180,8 @@ type CryptographicKey implements BasicObject & StixObject & StixCoreObject & Sti
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -10238,7 +10291,8 @@ type CryptocurrencyWallet implements BasicObject & StixObject & StixCoreObject &
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -10348,7 +10402,8 @@ type Hostname implements BasicObject & StixObject & StixCoreObject & StixCyberOb
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -10458,7 +10513,8 @@ type Text implements BasicObject & StixObject & StixCoreObject & StixCyberObserv
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -10568,7 +10624,8 @@ type UserAgent implements BasicObject & StixObject & StixCoreObject & StixCyberO
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -10678,7 +10735,8 @@ type BankAccount implements BasicObject & StixObject & StixCoreObject & StixCybe
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -10793,7 +10851,8 @@ type PhoneNumber implements BasicObject & StixObject & StixCoreObject & StixCybe
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -10903,7 +10962,8 @@ type PaymentCard implements BasicObject & StixObject & StixCoreObject & StixCybe
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -11019,7 +11079,8 @@ type MediaContent implements BasicObject & StixObject & StixCoreObject & StixCyb
   updated_at: DateTime!
   # inferences
   x_opencti_inferences: [Inference]
-    # StixCoreObject
+  # StixCoreObject
+  is_from_relation_inferred: Boolean
   createdBy: Identity
   numberOfConnectedElement: Int!
   objectMarking: MarkingDefinitionConnection
@@ -11644,6 +11705,7 @@ type StixCoreRelationship implements BasicRelationship & StixRelationship {
   createdBy: Identity
   objectMarking: MarkingDefinitionConnection
   # StixCoreRelationship
+  is_from_relation_inferred: Boolean
   description: String
   start_time: DateTime
   stop_time: DateTime
@@ -11796,6 +11858,7 @@ type StixSightingRelationship implements BasicRelationship & StixRelationship {
   createdBy: Identity
   objectMarking: MarkingDefinitionConnection
   # StixSightingRelationship
+  is_from_relation_inferred: Boolean
   description: String
   first_seen: DateTime
   last_seen: DateTime
