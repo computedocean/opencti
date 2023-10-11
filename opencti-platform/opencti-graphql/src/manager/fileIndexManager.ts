@@ -36,7 +36,7 @@ const MAX_FILE_SIZE: number = conf.get('file_index_manager:max_file_size') || 52
 const defaultMimeTypes = ['application/pdf', 'text/plain', 'text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
 const ACCEPT_MIME_TYPES: string[] = conf.get('file_index_manager:accept_mime_types') || defaultMimeTypes;
 
-// TODO add limit for number of files ?
+// TODO add limit for number of files ? => to be defined during performance test
 const indexImportedFiles = async (
   context: AuthContext,
   fromDate: Date | null = null,
@@ -56,7 +56,7 @@ const indexImportedFiles = async (
   }
   // search documents by file id (to update if already indexed)
   const searchOptions = {
-    first: files.length, // TODO maybe we should paginate ?
+    first: files.length, // TODO pagination needed ? to be defined during performance test
     connectionFormat: false,
     highlight: false,
     fileIds: files.map((f) => f.id),
@@ -77,7 +77,6 @@ const indexImportedFiles = async (
   });
   const loadFilesToIndex = async (file: { id: string, internalId: string, entityId: string | null, name: string, uploaded_at: Date | undefined }) => {
     const content = await getFileContent(file.id, 'base64');
-    // TODO test content is not null
     return {
       internal_id: file.internalId,
       file_id: file.id,
@@ -104,7 +103,7 @@ const handleStreamEvents = async (streamEvents: Array<SseEvent<StreamDataEvent>>
         const stix = updateEvent.data;
         const entityId = stix.extensions[STIX_EXT_OCTI].id;
         const stixFiles = stix.extensions[STIX_EXT_OCTI].files;
-        // test if markings or organization sharing or authorized members or authorities have been updated
+        // test if markings or organization sharing have been updated
         const isDataRestrictionsUpdate = updateEvent.context?.patch && updateEvent.context.patch
           .map((op) => op.path && (op.path.includes('granted_refs') || op.path.includes('object_marking_refs')));
         if (stixFiles?.length > 0 && isDataRestrictionsUpdate) {

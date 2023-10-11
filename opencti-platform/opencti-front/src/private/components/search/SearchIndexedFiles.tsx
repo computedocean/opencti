@@ -6,22 +6,16 @@ import {
 } from '@components/search/__generated__/SearchIndexedFilesLinesPaginationQuery.graphql';
 import useQueryLoading from '../../../utils/hooks/useQueryLoading';
 import Loader from '../../../components/Loader';
-import useAuth from '../../../utils/hooks/useAuth';
 import { usePaginationLocalStorage } from '../../../utils/hooks/useLocalStorage';
 import { Filters } from '../../../components/list_lines';
 import ListLines from '../../../components/list_lines/ListLines';
 import ExportContextProvider from '../../../utils/ExportContextProvider';
 
-// TODO : filters keys + redirectionMode + Datacolumns
 interface SearchIndexedFilesProps {
   search: string;
 }
 const LOCAL_STORAGE_KEY = 'view-files';
 const SearchIndexedFiles : FunctionComponent<SearchIndexedFilesProps> = ({ search }) => {
-  const {
-    platformModuleHelpers: { isRuntimeFieldEnable },
-  } = useAuth();
-
   const {
     viewStorage,
     helpers: storageHelpers,
@@ -40,7 +34,6 @@ const SearchIndexedFiles : FunctionComponent<SearchIndexedFilesProps> = ({ searc
     filters,
     sortBy,
     orderAsc,
-    // redirectionMode,
   } = viewStorage;
 
   const queryRef = useQueryLoading<SearchIndexedFilesLinesPaginationQuery>(
@@ -49,12 +42,11 @@ const SearchIndexedFiles : FunctionComponent<SearchIndexedFilesProps> = ({ searc
   );
 
   const renderLines = () => {
-    const isRuntimeSort = isRuntimeFieldEnable() ?? false;
     const dataColumns = {
       name: {
         label: 'Filename',
         width: '25%',
-        isSortable: true,
+        isSortable: false,
       },
       uploaded_at: {
         label: 'Upload date',
@@ -69,17 +61,17 @@ const SearchIndexedFiles : FunctionComponent<SearchIndexedFilesProps> = ({ searc
       entity_type: {
         label: 'Attached entity type',
         width: '15%',
-        isSortable: isRuntimeSort,
+        isSortable: false,
       },
       entity_name: {
         label: 'Attached entity name',
         width: '25%',
-        isSortable: isRuntimeSort,
+        isSortable: false,
       },
       objectMarking: {
         label: 'Attached entity marking',
         width: '10%',
-        isSortable: isRuntimeSort,
+        isSortable: false,
       },
     };
 
@@ -92,7 +84,6 @@ const SearchIndexedFiles : FunctionComponent<SearchIndexedFilesProps> = ({ searc
           handleSort={storageHelpers.handleSort}
           handleAddFilter={storageHelpers.handleAddFilter}
           handleRemoveFilter={storageHelpers.handleRemoveFilter}
-          handleChangeView={storageHelpers.handleChangeView}
           disableCards={true}
           secondaryAction={true}
           filters={filters}

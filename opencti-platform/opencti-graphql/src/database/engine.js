@@ -743,7 +743,6 @@ export const elUpdateMapping = async (properties) => {
 };
 export const elConfigureAttachmentProcessor = async () => {
   let success = true;
-  // TODO get configuration and test if it's already configured
   if (engine instanceof ElkClient) {
     await engine.ingest.putPipeline({
       id: 'attachment',
