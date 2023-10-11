@@ -7,7 +7,6 @@ import {
 import useQueryLoading from '../../../utils/hooks/useQueryLoading';
 import Loader from '../../../components/Loader';
 import { usePaginationLocalStorage } from '../../../utils/hooks/useLocalStorage';
-import { Filters } from '../../../components/list_lines';
 import ListLines from '../../../components/list_lines/ListLines';
 import ExportContextProvider from '../../../utils/ExportContextProvider';
 
@@ -25,13 +24,13 @@ const SearchIndexedFiles : FunctionComponent<SearchIndexedFilesProps> = ({ searc
     {
       sortBy: '_score',
       orderAsc: true,
-      filters: {} as Filters,
     },
+    undefined,
+    true,
   );
 
   const {
     numberOfElements,
-    filters,
     sortBy,
     orderAsc,
   } = viewStorage;
@@ -86,7 +85,6 @@ const SearchIndexedFiles : FunctionComponent<SearchIndexedFilesProps> = ({ searc
           handleRemoveFilter={storageHelpers.handleRemoveFilter}
           disableCards={true}
           secondaryAction={true}
-          filters={filters}
           paginationOptions={paginationOptions}
           numberOfElements={numberOfElements}
           availableFilterKeys={[]}
