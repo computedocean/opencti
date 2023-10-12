@@ -164,11 +164,11 @@ export const loadFile = async (user, filename) => {
       Key: filename
     }));
     const metaData = {
-      messages: [],
-      errors: [],
+      ...object.Metadata,
       mimetype: object.Metadata.mimetype,
       entity_id: object.Metadata.entity_id,
-      ...object.Metadata,
+      messages: [],
+      errors: [],
     };
     if (metaData.labels_text) {
       metaData.labels = metaData.labels_text.split(';');
