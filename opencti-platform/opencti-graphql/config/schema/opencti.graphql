@@ -583,18 +583,6 @@ enum StreamCollectionOrdering {
   description
   stream_public
 }
-enum StreamCollectionFilter {
-  name
-  stream_public
-  stream_live
-}
-
-input StreamCollectionFiltering {
-  key: [StreamCollectionFilter!]!
-  values: [String]
-  operator: String
-  filterMode: FilterMode
-}
 
 ############## SubTypes
 enum SubTypesOrdering {
@@ -11236,7 +11224,7 @@ type Query {
     orderBy: StreamCollectionOrdering
     orderMode: OrderingMode
     search: String
-    filters: [StreamCollectionFiltering]
+    filters: FilterGroup
   ): StreamCollectionConnection!
   statusTemplate(id: String!): StatusTemplate @auth
   statusTemplates(
