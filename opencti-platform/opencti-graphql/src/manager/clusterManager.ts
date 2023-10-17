@@ -11,7 +11,6 @@ import publisherManager from './publisherManager';
 import notificationManager from './notificationManager';
 import ingestionManager from './ingestionManager';
 import activityManager from './activityManager';
-import fileIndexManager from './fileIndexManager';
 import { registerClusterInstance } from '../database/redis';
 import { getEntityFromCache } from '../database/cache';
 import { executionContext, SYSTEM_USER } from '../utils/access';
@@ -48,8 +47,8 @@ const initClusterManager = () => {
       ingestionManager.status(),
       activityManager.status(settings),
       playbookManager.status(settings),
-      fileIndexManager.status(settings),
     ];
+    // TODO fileIndexManager.status(settings),
     const configData: ClusterConfig = { platform_id: platformId, managers };
     await registerClusterInstance(platformId, configData);
   };

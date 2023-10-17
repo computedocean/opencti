@@ -756,7 +756,7 @@ export const elConfigureAttachmentProcessor = async () => {
         }
       ]
     }).catch((e) => {
-      logApp.error('[SEARCH] Error configure attachment processor', { error: e });
+      logApp.warn('[SEARCH] Error configure attachment processor', { error: e });
       success = false;
     });
   } else {
@@ -778,7 +778,7 @@ export const elConfigureAttachmentProcessor = async () => {
         ]
       }
     }).catch((e) => {
-      logApp.error('[SEARCH] Error configure attachment processor', { error: e });
+      logApp.warn('[SEARCH] Error configure attachment processor', { error: e });
       success = false;
     });
   }

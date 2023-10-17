@@ -2,7 +2,6 @@ import conf, {
   ENABLED_API,
   ENABLED_CONNECTOR_MANAGER,
   ENABLED_EXPIRED_MANAGER,
-  ENABLED_FILE_INDEX_MANAGER,
   ENABLED_HISTORY_MANAGER, ENABLED_INGESTION_MANAGER,
   ENABLED_NOTIFICATION_MANAGER, ENABLED_PLAYBOOK_MANAGER,
   ENABLED_PUBLISHER_MANAGER,
@@ -34,8 +33,6 @@ import activityManager from './manager/activityManager';
 import importCsvConnector from './connector/importCsv/importCsv-connector';
 import { ENABLED_IMPORT_CSV_BUILT_IN_CONNECTOR } from './connector/importCsv/importCsv-configuration';
 import playbookManager from './manager/playbookManager';
-import fileIndexManager from './manager/fileIndexManager';
-import { isAttachmentProcessorEnabled } from './database/engine';
 
 // region dynamic modules
 const startModules = async () => {
@@ -126,6 +123,8 @@ const startModules = async () => {
   } else {
     logApp.info('[OPENCTI-MODULE] Playbook manager not started (disabled by configuration)');
   }
+  // TODO not started for now, until management panel
+  /*
   if (ENABLED_FILE_INDEX_MANAGER && isAttachmentProcessorEnabled()) {
     await fileIndexManager.start();
   } else if (ENABLED_FILE_INDEX_MANAGER && !isAttachmentProcessorEnabled()) {
@@ -133,6 +132,7 @@ const startModules = async () => {
   } else {
     logApp.info('[OPENCTI-MODULE] File index manager not started (disabled by configuration)');
   }
+  */
   // endregion
   // region Cluster manager
   await clusterManager.start();

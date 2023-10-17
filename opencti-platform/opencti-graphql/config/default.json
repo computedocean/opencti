@@ -154,7 +154,7 @@
     "interval": 60000
   },
   "file_index_manager": {
-    "enabled": true,
+    "enabled": false,
     "lock_key": "file_index_manager_lock",
     "stream_lock_key": "file_index_manager_stream_lock",
     "interval": 300000,
