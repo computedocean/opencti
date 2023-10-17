@@ -12,12 +12,14 @@ import Tooltip from '@mui/material/Tooltip';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import ToggleButton from '@mui/material/ToggleButton';
 import { withRouter } from 'react-router-dom';
+import fileDownload from 'js-file-download';
 import themeLight from './ThemeLight';
 import themeDark from './ThemeDark';
 import { commitLocalUpdate } from '../relay/environment';
 import { exportImage, exportPdf } from '../utils/Image';
 import inject18n from './i18n';
 import Loader from './Loader';
+import { fromB64 } from '../utils/String';
 
 const styles = () => ({
   exportButtons: {
@@ -108,6 +110,24 @@ class ExportButtons extends Component {
     this.setState({ anchorElPdf: event.currentTarget });
   }
 
+  handleExportJson(workspace) {
+    this.setState({ exporting: true });
+
+    const dashboardName = workspace.name;
+    const widgets = { ...JSON.parse(fromB64(workspace.manifest)) };
+    const dashboardConfig = JSON.stringify({
+      name: dashboardName,
+      type: workspace.type,
+      ...widgets,
+    });
+    const blob = new Blob([dashboardConfig], { type: 'text/json' });
+    const [day, month, year] = new Date().toLocaleDateString('fr-FR').split('/');
+    const fileName = `${year}${day}${month}_octi_dashboard_${dashboardName}`;
+
+    fileDownload(blob, fileName, 'application/json');
+    this.setState({ exporting: false });
+  }
+
   handleClosePdf() {
     this.setState({ anchorElPdf: null });
   }
@@ -168,7 +188,10 @@ class ExportButtons extends Component {
       containerId,
       investigationAddFromContainer,
       history,
+      location,
+      workspace,
     } = this.props;
+    const isCustomDashBoard = location.pathname.includes('dashboards/');
     return (
       <div className={classes.exportButtons} id="export-buttons">
         <ToggleButtonGroup size="small" color="secondary" exclusive={true}>
@@ -182,6 +205,13 @@ class ExportButtons extends Component {
               <FilePdfBox fontSize="small" color="primary" />
             </ToggleButton>
           </Tooltip>
+          {isCustomDashBoard && (
+            <Tooltip title={t('Export to JSON')}>
+              <ToggleButton onClick={this.handleExportJson.bind(this, workspace)}>
+                <GetAppOutlined fontSize="small" color="primary" />
+              </ToggleButton>
+            </Tooltip>
+          )}
           {investigationAddFromContainer && (
             <Tooltip title={t('Start an investigation')}>
               <ToggleButton onClick={investigationAddFromContainer.bind(this, containerId, history)}>
