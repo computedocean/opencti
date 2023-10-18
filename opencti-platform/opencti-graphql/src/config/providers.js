@@ -13,7 +13,7 @@ import { OAuth2Strategy as GoogleStrategy } from 'passport-google-oauth';
 import validator from 'validator';
 import { initAdmin, login, loginFromProvider } from '../domain/user';
 import conf, { logApp } from './conf';
-import { AuthenticationFailure, ConfigurationError } from './errors';
+import { AuthenticationFailure, ConfigurationError, INITIALIZATION_FAIL } from './errors';
 import { isNotEmptyField } from '../database/utils';
 
 export const empty = R.anyPass([R.isNil, R.isEmpty]);
@@ -31,14 +31,17 @@ export const initializeAdminUser = async (context) => {
     || adminPassword === DEFAULT_CONF_VALUE
     || adminToken === DEFAULT_CONF_VALUE
   ) {
-    throw ConfigurationError('You need to configure the environment vars');
+    const error = { reason: 'You need to configure the environment vars' };
+    throw ConfigurationError(INITIALIZATION_FAIL, { error });
   } else {
     // Check fields
     if (!validator.isEmail(adminEmail)) {
-      throw ConfigurationError('Email must be a valid email address');
+      const error = { reason: 'Email must be a valid email address' };
+      throw ConfigurationError(INITIALIZATION_FAIL, { error });
     }
     if (!validator.isUUID(adminToken)) {
-      throw ConfigurationError('Token must be a valid UUID');
+      const error = { reason: 'Token must be a valid UUID' };
+      throw ConfigurationError(INITIALIZATION_FAIL, { error });
     }
     // Initialize the admin account
     // noinspection JSIgnoredPromiseFromCall

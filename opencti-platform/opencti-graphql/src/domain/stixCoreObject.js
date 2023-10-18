@@ -14,7 +14,7 @@ import { internalLoadById, listEntities, storeLoadById } from '../database/middl
 import { findAll as relationFindAll } from './stixCoreRelationship';
 import { delEditContext, lockResource, notify, setEditContext, storeUpdateEvent } from '../database/redis';
 import { BUS_TOPICS } from '../config/conf';
-import { FunctionalError, LockTimeoutError, TYPE_LOCK_ERROR, UnsupportedError } from '../config/errors';
+import { FunctionalError, LockTimeoutError, TYPE_LOCK_ERROR, UnknownError, UnsupportedError } from '../config/errors';
 import { isStixCoreObject, stixCoreObjectOptions } from '../schema/stixCoreObject';
 import {
   ABSTRACT_STIX_CORE_OBJECT,
@@ -448,9 +448,9 @@ export const stixCoreObjectImportPush = async (context, user, id, file, noTrigge
     return up;
   } catch (err) {
     if (err.name === TYPE_LOCK_ERROR) {
-      throw LockTimeoutError({ participantIds });
+      throw LockTimeoutError('DATA_IMPORT_UPLOAD', { error: err, participantIds });
     }
-    throw err;
+    throw UnknownError('DATA_IMPORT_UPLOAD', { error: err });
   } finally {
     if (lock) await lock.unlock();
   }
@@ -503,9 +503,9 @@ export const stixCoreObjectImportDelete = async (context, user, fileId) => {
     return up;
   } catch (err) {
     if (err.name === TYPE_LOCK_ERROR) {
-      throw LockTimeoutError({ participantIds });
+      throw LockTimeoutError('DATA_IMPORT_DELETE', { error: err, participantIds });
     }
-    throw err;
+    throw UnknownError('DATA_IMPORT_DELETE', { error: err });
   } finally {
     if (lock) await lock.unlock();
   }

@@ -30,7 +30,7 @@ import { ENTITY_TYPE_VOCABULARY } from '../modules/vocabulary/vocabulary-types';
 import { ENTITY_TYPE_ENTITY_SETTING } from '../modules/entitySetting/entitySetting-types';
 import { ENTITY_TYPE_WORKSPACE } from '../modules/workspace/workspace-types';
 import { ENTITY_TYPE_NOTIFIER } from '../modules/notifier/notifier-types';
-import { UnsupportedError } from './errors';
+import { INITIALIZATION_FAIL, UnknownError, UnsupportedError } from './errors';
 
 // https://golang.org/src/crypto/x509/root_linux.go
 const LINUX_CERTFILES = [
@@ -353,7 +353,7 @@ export const configureCA = (certificates) => {
       if (err.code === 'ENOENT') {
         // For this error, try the next one.
       } else {
-        throw err;
+        throw UnknownError('CERTIFICATES_CONFIGURATION', { error: err });
       }
     }
   }
@@ -501,7 +501,8 @@ export const computeDefaultAccountStatus = () => {
     if (accountStatus) {
       return defaultConf;
     }
-    throw UnsupportedError(`Invalid default_initialize_account_status configuration ${defaultConf} (${Object.keys(ACCOUNT_STATUSES).join(', ')})`);
+    const error = { reason: `Invalid default_initialize_account_status configuration ${defaultConf} (${Object.keys(ACCOUNT_STATUSES).join(', ')})` };
+    throw UnsupportedError(INITIALIZATION_FAIL, { error });
   }
   return ACCOUNT_STATUS_ACTIVE;
 };

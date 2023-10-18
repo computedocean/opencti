@@ -1,6 +1,6 @@
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions';
 import type { BasicStoreIdentifier, StoreEntity, StoreRelation } from '../types/store';
-import { UnsupportedError } from '../config/errors';
+import { CACHE_MANAGEMENT, UnsupportedError } from '../config/errors';
 import { telemetry } from '../config/tracing';
 import type { AuthContext, AuthUser } from '../types/user';
 import type { StixId, StixObject } from '../types/stix-common';
@@ -76,7 +76,8 @@ const getEntitiesFromCache = async <T extends BasicStoreIdentifier | StixObject>
   const getEntitiesFromCacheFn = async (): Promise<Array<T> | Map<string, T>> => {
     const fromCache = cache[type];
     if (!fromCache) {
-      throw UnsupportedError(`${type} is not supported in cache configuration`);
+      const error = { reason: `${type} is not supported in cache configuration` };
+      throw UnsupportedError(CACHE_MANAGEMENT, { error });
     }
     if (!fromCache.values) {
       fromCache.values = await fromCache.fn();

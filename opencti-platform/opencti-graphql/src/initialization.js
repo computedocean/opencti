@@ -17,7 +17,14 @@ import { ENTITY_TYPE_MIGRATION_STATUS } from './schema/internalObject';
 import { applyMigration, lastAvailableMigrationTime } from './database/migration';
 import { createEntity, loadEntity } from './database/middleware';
 import { INDEX_INTERNAL_OBJECTS, INTERNAL_PLAYBOOK_QUEUE, INTERNAL_SYNC_QUEUE } from './database/utils';
-import { ConfigurationError, LockTimeoutError, TYPE_LOCK_ERROR, UnknownError, UnsupportedError } from './config/errors';
+import {
+  ConfigurationError,
+  INITIALIZATION_FAIL,
+  LockTimeoutError,
+  TYPE_LOCK_ERROR,
+  UnknownError,
+  UnsupportedError
+} from './config/errors';
 import {
   BYPASS,
   BYPASS_REFERENCE,
@@ -159,9 +166,10 @@ const initializeSchema = async () => {
   // New platform so delete all indices to prevent conflict
   const isInternalIndexExists = await elIndexExists(INDEX_INTERNAL_OBJECTS);
   if (isInternalIndexExists) {
-    throw ConfigurationError('[INIT] Fail initialize schema, index already exists, previous initialization fail '
-      + 'because you kill the platform before the end of the initialization. Please remove your '
-      + 'elastic/opensearch data and restart.');
+    const error = { detail: '[INIT] Fail initialize schema, index already exists, previous initialization fail '
+          + 'because you kill the platform before the end of the initialization. Please remove your '
+          + 'elastic/opensearch data and restart.' };
+    throw ConfigurationError(INITIALIZATION_FAIL, { error });
   }
   // Create default indexes
   await elCreateIndices();
@@ -355,9 +363,8 @@ const isCompatiblePlatform = async (context) => {
   // Runtime version must be >= of the stored runtime
   const runtimeVersion = semver.coerce(PLATFORM_VERSION).version;
   if (semver.lt(runtimeVersion, currentVersion)) {
-    throw UnsupportedError(
-      `Your platform data (${currentVersion}) are too recent to start on version ${runtimeVersion}`
-    );
+    const error = { reason: `Your platform data (${currentVersion}) are too recent to start on version ${runtimeVersion}` };
+    throw UnsupportedError(INITIALIZATION_FAIL, { error });
   }
 };
 
@@ -388,10 +395,10 @@ const platformInit = async (withMarkings = true) => {
     }
   } catch (e) {
     if (e.name === TYPE_LOCK_ERROR) {
-      const reason = '[OPENCTI] Platform cant get the lock for initialization (can be due to other instance currently migrating/initializing)';
-      throw LockTimeoutError({ participantIds: [PLATFORM_LOCK_ID] }, reason);
+      const reason = 'Platform cant get the lock for initialization (can be due to other instance currently migrating/initializing)';
+      throw LockTimeoutError(INITIALIZATION_FAIL, { reason, participantIds: [PLATFORM_LOCK_ID] });
     } else {
-      throw UnknownError('[OPENCTI] Platform initialization fail', { error: e });
+      throw UnknownError(INITIALIZATION_FAIL, { error: e });
     }
   } finally {
     if (lock) {

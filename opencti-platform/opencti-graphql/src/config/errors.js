@@ -1,5 +1,9 @@
 import { createError } from 'apollo-errors';
 
+// Error codes
+export const INITIALIZATION_FAIL = 'INITIALIZATION_FAIL';
+export const CACHE_MANAGEMENT = 'CACHE_MANAGEMENT';
+
 const CATEGORY_TECHNICAL = 'technical';
 const CATEGORY_BUSINESS = 'business';
 
@@ -101,7 +105,7 @@ export const AlreadyDeletedError = (data) => error(ALREADY_DELETED_ERROR, 'Busin
 
 const TYPE_LOCK = 'LockError';
 export const TYPE_LOCK_ERROR = 'ExecutionError';
-export const LockTimeoutError = (data, reason) => error(TYPE_LOCK, 'Lock timeout', {
+export const LockTimeoutError = (reason, data) => error(TYPE_LOCK, 'Lock timeout', {
   reason: reason ?? 'Execution timeout, too many concurrent call on the same entities',
   http_status: 500,
   category: CATEGORY_BUSINESS,

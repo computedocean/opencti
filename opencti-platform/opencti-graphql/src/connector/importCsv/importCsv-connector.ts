@@ -57,7 +57,7 @@ const initImportCsvConnector = () => {
         stream.on('data', async (chunk) => {
           chunks.push(chunk.toString('utf8'));
         }).on('error', (err) => {
-          throw err;
+          throw err; // TODO JRI CHECK THAT
         })
           .on('end', async () => {
             const string = chunks.join('');
