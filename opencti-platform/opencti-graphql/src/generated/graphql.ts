@@ -7155,7 +7155,7 @@ export type FileMetadata = {
 export type Filter = {
   key: Array<Scalars['String']['input']>;
   mode?: InputMaybe<FilterMode>;
-  operator?: InputMaybe<Scalars['String']['input']>;
+  operator?: InputMaybe<FilterOperator>;
   values: Array<InputMaybe<Scalars['String']['input']>>;
 };
 
@@ -7168,6 +7168,18 @@ export type FilterGroup = {
 export enum FilterMode {
   And = 'and',
   Or = 'or'
+}
+
+export enum FilterOperator {
+  Eq = 'eq',
+  Gt = 'gt',
+  Gte = 'gte',
+  Lt = 'lt',
+  Lte = 'lte',
+  Match = 'match',
+  NotEq = 'not_eq',
+  Script = 'script',
+  Wildcard = 'wildcard'
 }
 
 export type FilterRepresentative = {
@@ -27755,6 +27767,7 @@ export type ResolversTypes = ResolversObject<{
   Filter: Filter;
   FilterGroup: FilterGroup;
   FilterMode: FilterMode;
+  FilterOperator: FilterOperator;
   FilterRepresentative: ResolverTypeWrapper<FilterRepresentative>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   GetMetrics: ResolverTypeWrapper<GetMetrics>;
