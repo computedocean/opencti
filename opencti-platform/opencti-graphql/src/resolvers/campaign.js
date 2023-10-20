@@ -7,13 +7,6 @@ import {
   stixDomainObjectEditContext,
   stixDomainObjectEditField,
 } from '../domain/stixDomainObject';
-import {
-  RELATION_CREATED_BY,
-  RELATION_OBJECT_ASSIGNEE,
-  RELATION_OBJECT_LABEL,
-  RELATION_OBJECT_MARKING
-} from '../schema/stixRefRelationship';
-import { buildRefRelationKey } from '../schema/general';
 
 const campaignResolvers = {
   Query: {
@@ -25,13 +18,6 @@ const campaignResolvers = {
       }
       return campaignsTimeSeries(context, context.user, args);
     },
-  },
-  CampaignsFilter: {
-    createdBy: buildRefRelationKey(RELATION_CREATED_BY),
-    markedBy: buildRefRelationKey(RELATION_OBJECT_MARKING),
-    objectAssignee: buildRefRelationKey(RELATION_OBJECT_ASSIGNEE),
-    objectLabel: buildRefRelationKey(RELATION_OBJECT_LABEL),
-    creator: 'creator_id',
   },
   Mutation: {
     campaignEdit: (_, { id }, context) => ({

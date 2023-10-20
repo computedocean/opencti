@@ -1,10 +1,10 @@
 import {
+  containersObjectsOfObject,
   findAll,
   findById,
+  knowledgeAddFromInvestigation,
   objects,
-  containersObjectsOfObject,
-  relatedContainers,
-  knowledgeAddFromInvestigation
+  relatedContainers
 } from '../domain/container';
 import {
   stixDomainObjectAddRelation,
@@ -14,13 +14,6 @@ import {
   stixDomainObjectEditContext,
   stixDomainObjectEditField,
 } from '../domain/stixDomainObject';
-import {
-  RELATION_CREATED_BY,
-  RELATION_OBJECT,
-  RELATION_OBJECT_LABEL,
-  RELATION_OBJECT_MARKING,
-} from '../schema/stixRefRelationship';
-import { buildRefRelationKey } from '../schema/general';
 import { investigationAddFromContainer } from '../modules/workspace/investigation-domain';
 
 const containerResolvers = {
@@ -38,13 +31,6 @@ const containerResolvers = {
     },
     objects: (container, args, context) => objects(context, context.user, container.id, args),
     relatedContainers: (container, args, context) => relatedContainers(context, context.user, container.id, args),
-  },
-  ContainersFilter: {
-    createdBy: buildRefRelationKey(RELATION_CREATED_BY),
-    markedBy: buildRefRelationKey(RELATION_OBJECT_MARKING),
-    objectLabel: buildRefRelationKey(RELATION_OBJECT_LABEL),
-    objects: buildRefRelationKey(RELATION_OBJECT, '*'),
-    creator: 'creator_id',
   },
   Mutation: {
     containerEdit: (_, { id }, context) => ({
